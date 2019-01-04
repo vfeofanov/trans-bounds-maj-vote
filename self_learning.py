@@ -2,10 +2,10 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 # import pyximport;
 # pyximport.install()
-import self_learning_multi_class_3_c as ssl
+import self_learning_cython as slc
 
 
-def joint_bayes_risk(margin, pred, i, j, theta, printy, samplingRate=50):
+def joint_bayes_risk(margin, pred, i, j, theta, samplingRate=50):
     # li = \sum_{x\in X_U} \I{y=i} =approx.= \sum_{x\in X_U} m_Q(x,i)
     li = np.sum(margin[:, i])
     margins = margin[:, j]
@@ -108,7 +108,7 @@ def msla(xTrain, yTrain, xTest, cython=True, **kwargs):
 
         # Find a threshold minimizing Bayes conditional error
         if cython:
-            theta = ssl.c_optimal_threshold_vector(marginTest, predTest, K)
+            theta = slc.c_optimal_threshold_vector(marginTest, predTest, K)
         else:
             theta = optimal_threshold_vector(marginTest, predTest, K)
         thetas.append(theta)
