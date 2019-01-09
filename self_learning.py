@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-# import pyximport;
-# pyximport.install()
+import pyximport;
+pyximport.install()
 import self_learning_cython as slc
 
 
@@ -12,7 +12,6 @@ def joint_bayes_risk(margin, pred, i, j, theta, samplingRate=50):
     # gammas = sorted(list(set(margins[margins > theta])))
     gammas = theta + (1 - theta) * (np.arange(samplingRate) + 1) / samplingRate
     infimum = 1e+05
-    gamma_star = 0
     upperBounds = []
     # for gamma in gammas:
     for n in range(np.size(gammas)):
