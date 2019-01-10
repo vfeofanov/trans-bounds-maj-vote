@@ -75,15 +75,15 @@ def optimal_threshold_vector(margin, pred, K, printy=True, samplingRate=50):
     return np.array(theta)
 
 
-def msla(xTrain, yTrain, xTest, cython=True, **kwargs):
+def msla(x_l, y_l, x_u, cython=True, **kwargs):
     """
     A margin-based self-learning algorithm.
-    :param xTrain: Labeled observations.
-    :param yTrain: Labels.
-    :param xTest:  Unlabeled data. Will be used for learning.
+    :param x_l: Labeled observations.
+    :param y_l: Labels.
+    :param x_u:  Unlabeled data. Will be used for learning.
     :param cython:  Whether or not to use cython code, which gives speedup in computation. The default value is True.
-    :return: The final classification model H that has been trained on (xTrain, yTrain)
-    and pseudo-labeled (xTest, yPred)
+    :return: The final classification model H that has been trained on (x_l, y_l)
+    and pseudo-labeled (x_u, yPred)
     """
 
     if 'n_estimators' not in kwargs:
@@ -92,57 +92,58 @@ def msla(xTrain, yTrain, xTest, cython=True, **kwargs):
         n_est = kwargs['n_estimators']
 
     classifier = RandomForestClassifier(n_estimators=n_est, oob_score=True, n_jobs=-1)
-    l = xTrain.shape[0]
+    l = x_l.shape[0]
     sample_distr = np.repeat(1 / l, l)
-    K = np.unique(yTrain).shape[0]
+    K = np.unique(y_l).shape[0]
     b = True
     thetas = []
     while b:
-        u = xTest.shape[0]
+        u = x_u.shape[0]
         # Learn a classifier
         H = classifier
-        H.fit(xTrain, yTrain, sample_weight=sample_distr)
-        marginTest = H.predict_proba(xTest)
-        predTest = np.argmax(marginTest, axis=1)
+        H.fit(x_l, y_l, sample_weight=sample_distr)
+        margin_u = H.predict_proba(x_u)
+        pred_u = np.argmax(margin_u, axis=1)
 
         # Find a threshold minimizing Bayes conditional error
         if cython:
-            theta = slc.c_optimal_threshold_vector(marginTest, predTest, K)
+            theta = slc.c_optimal_threshold_vector(margin_u, pred_u, K)
         else:
-            theta = optimal_threshold_vector(marginTest, predTest, K)
+            theta = optimal_threshold_vector(margin_u, pred_u, K)
         thetas.append(theta)
 
         # Select observations with argmax margin more than corresponding theta
-        selection = np.array(marginTest[np.arange(u), predTest] >= theta[predTest])
-        xS = xTest[selection, :]
-        yS = predTest[selection]
+        selection = np.array(margin_u[np.arange(u), pred_u] >= theta[pred_u])
+        x_s = x_u[selection, :]
+        y_s = pred_u[selection]
         # Stop if there is no anything to add:
-        if xS.shape[0] == 0:
+        if x_s.shape[0] == 0:
             b = False
             continue
 
-        # Move them from the test set to the train one
-        xTrain = np.concatenate((xTrain, xS))
-        yTrain = np.concatenate((yTrain, yS))
-        xTest = np.delete(xTest, np.where(selection), axis=0)
-        s = xTrain.shape[0] - l
+        # Move them from the unlabeled set to the train one
+        x_l = np.concatenate((x_l, x_s))
+        y_l = np.concatenate((y_l, y_s))
+        x_u = np.delete(x_u, np.where(selection), axis=0)
+        s = x_l.shape[0] - l
         sample_distr = np.concatenate((np.repeat(1 / l, l), np.repeat(1 / s, s)))
 
         # Stop criterion
-        if xTest.shape[0] == 0:
+        if x_u.shape[0] == 0:
             b = False
     return H, thetas
 
 
-def fsla(xTrain, yTrain, xTest, theta, max_iter, **kwargs):
+def fsla(x_l, y_l, x_u, theta, max_iter, **kwargs):
     """
     A margin-based self-learning algorithm.
-    :param xTrain: Labeled observations.
-    :param yTrain: Labels.
-    :param xTest:  Unlabeled data. Will be used for learning.
+    :param x_l: Labeled observations.
+    :param y_l: Labels.
+    :param x_u:  Unlabeled data. Will be used for learning.
     :param theta: Theta
-    :return: The final classification model H that has been trained on (xTrain, yTrain)
-    and pseudo-labeled (xTest, yPred)
+    :param max_iter: A maximum number of iterations that self-learning does.
+    :return: The final classification model H that has been trained on (x_l, y_l)
+    and pseudo-labeled (x_u, yPred)
     """
 
     if 'n_estimators' not in kwargs:
@@ -151,36 +152,36 @@ def fsla(xTrain, yTrain, xTest, theta, max_iter, **kwargs):
         n_est = kwargs['n_estimators']
 
     classifier = RandomForestClassifier(n_estimators=n_est, oob_score=True, n_jobs=-1)
-    l = xTrain.shape[0]
+    l = x_l.shape[0]
     sample_distr = np.repeat(1 / l, l)
     n = 1
     b = True
     while b:
-        u = xTest.shape[0]
+        u = x_u.shape[0]
         # Learn a classifier
         H = classifier
-        H.fit(xTrain, yTrain, sample_weight=sample_distr)
-        marginTest = H.predict_proba(xTest)
-        predTest = np.argmax(marginTest, axis=1)
+        H.fit(x_l, y_l, sample_weight=sample_distr)
+        margin_u = H.predict_proba(x_u)
+        pred_u = np.argmax(margin_u, axis=1)
 
         # Select observations with argmax margin more than corresponding theta
-        selection = np.array(marginTest[np.arange(u), predTest] >= theta)
-        xS = xTest[selection, :]
-        yS = predTest[selection]
+        selection = np.array(margin_u[np.arange(u), pred_u] >= theta)
+        x_s = x_u[selection, :]
+        y_s = pred_u[selection]
 
-        # Move them from the test set to the train one
-        xTrain = np.concatenate((xTrain, xS))
-        yTrain = np.concatenate((yTrain, yS))
-        xTest = np.delete(xTest, np.where(selection), axis=0)
+        # Move them from the unlabeled set to the train one
+        x_l = np.concatenate((x_l, x_s))
+        y_l = np.concatenate((y_l, y_s))
+        x_u = np.delete(x_u, np.where(selection), axis=0)
 
-        s = xTrain.shape[0] - l
-        if xS.shape[0] == 0:
+        s = x_l.shape[0] - l
+        if x_s.shape[0] == 0:
             b = False
             continue
         sample_distr = np.concatenate((np.repeat(1 / l, l), np.repeat(1 / s, s)))
 
         # Stop criterion
-        if xTest.shape[0] == 0:
+        if x_u.shape[0] == 0:
             b = False
         n += 1
         if n == max_iter:
