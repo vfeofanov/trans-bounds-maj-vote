@@ -6,7 +6,7 @@ def read_dna():
     df1 = load_svmlight_file("data/dna.scale")
     x1 = df1[0].todense()
     y1 = df1[1]
-    df2 = load_svmlight_file("data/dna.scale.t")
+    df2 = load_svmlight_file("data/dna.scale.test")
     x2 = df2[0].todense()
     y2 = df2[1]
     x = np.concatenate((x1, x2))
