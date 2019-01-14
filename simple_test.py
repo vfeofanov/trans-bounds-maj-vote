@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 
 
 def plot_graph(acc, f1):
-    fig, ax = plt.subplots()
+    plt.subplots()
     index = np.arange(5)
     bar_width = 0.35
     opacity = 0.8
@@ -75,7 +75,7 @@ def simple_test():
     # label propagation
     print("label propagation:")
     t0 = time.time()
-    label_prop_model = LabelPropagation(kernel='rbf', gamma=0.01, n_jobs=-1, tol=1e-3)
+    label_prop_model = LabelPropagation(gamma=0.01, n_jobs=-1, tol=1e-3)
     label_prop_model.fit(x_train, y_train)
     y_pred = label_prop_model.predict(x_train[y_train == -1, :])
     acc.append(accuracy_score(y_u_shuffled, y_pred))

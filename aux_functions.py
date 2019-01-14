@@ -16,6 +16,13 @@ def read_dna():
     return x, y
 
 
+def read_pendigits():
+    df = load_svmlight_file("data/pendigits")
+    x = df[0].todense()
+    y = df[1]
+    return x, y
+
+
 def partially_labeled_view(x_l, y_l, x_u, y_u):
     y_undefined = np.repeat(-1, np.shape(x_u)[0])
     y_train = np.concatenate((y_l, y_undefined))
