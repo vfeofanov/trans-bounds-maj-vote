@@ -8,7 +8,6 @@ import aux_functions as af
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 # other packages
-import matplotlib.pyplot as plt
 import numpy as np
 import time
 import warnings
@@ -71,7 +70,7 @@ def experiment_test(x, y, db_name, unlab_size, N=20):
 
         # tsvm
         t0 = time.time()
-        y_u_shuffled, y_pred = tsvm.ova_tsvm(x_l, y_l, x_u, y_u, db_name=db_name, timeout=None)
+        y_u_shuffled, y_pred = tsvm.ova_tsvm(x_l, y_l, x_u, y_u, db_name=db_name, num_exp=n, timeout=None)
         t1 = time.time()
         print("tsvm is finished, experiment", n)
         ova_tsvm[n, 0] = accuracy_score(y_u_shuffled, y_pred)
@@ -116,9 +115,18 @@ def experiment_test(x, y, db_name, unlab_size, N=20):
         fsla[:, 1],
         msla[:, 1]
     )).T
-    return np.mean(acc, axis=0), np.std(acc, axis=0), acc, np.mean(f1, axis=0), np.std(f1, axis=0), f1
+    acc_mean = np.mean(acc, axis=0)
+    acc_std = np.std(acc, axis=0)
+    f1_mean = np.mean(f1, axis=0)
+    f1_std = np.std(f1, axis=0)
+    np.savetxt("output/" + db_name + '/acc_mean.txt', np.round(acc_mean, 4))
+    np.savetxt("output/" + db_name + '/acc_std.txt', np.round(acc_std, 4))
+    np.savetxt("output/" + db_name + '/acc_full.txt', np.round(acc, 4))
+    np.savetxt("output/" + db_name + '/f1_mean.txt', np.round(f1_mean, 4))
+    np.savetxt("output/" + db_name + '/f1_std.txt', np.round(f1_std, 4))
+    np.savetxt("output/" + db_name + '/f1_full.txt', np.round(f1, 4))
 
 
 if __name__ == '__main__':
-    x, y = af.read_pendigits()
-    experiment_test(x, y, db_name="pendigits", unlab_size=0.99)
+    x, y = af.read_dna()
+    experiment_test(x, y, db_name="dna", unlab_size=0.99, N=2)

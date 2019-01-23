@@ -6,21 +6,37 @@ from sklearn.datasets import dump_svmlight_file
 import aux_functions as af
 
 
-def create_folders(db_name):
+def create_folders(db_name, num_exp):
     try:
-        os.mkdir("svm_light/"+db_name)
+        os.mkdir("output")
     except FileExistsError:
         pass
     try:
-        os.mkdir("svm_light/"+db_name+"/files")
+        os.mkdir("output/"+db_name)
     except FileExistsError:
         pass
     try:
-        os.mkdir("svm_light/"+db_name+"/models")
+        os.mkdir("output/"+db_name+"/tsvm")
+    except FileExistsError:
+        pass
+    if num_exp is not None:
+        subpath = db_name+"/tsvm/"+str(num_exp)
+        try:
+            os.mkdir("output/" + subpath)
+        except FileExistsError:
+            pass
+    else:
+        subpath = db_name + "/tsvm"
+    try:
+        os.mkdir("output/"+subpath+"/files")
     except FileExistsError:
         pass
     try:
-        os.mkdir("svm_light/"+db_name+"/predictions")
+        os.mkdir("output/"+subpath+"/models")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("output/"+subpath+"/predictions")
     except FileExistsError:
         pass
 
@@ -32,17 +48,21 @@ def get_pred_values(path):
     return y
 
 
-def ova_tsvm(x_l, y_l, x_u, y_u, db_name="tmp", timeout=None):
+def ova_tsvm(x_l, y_l, x_u, y_u, db_name="tmp", num_exp=None, timeout=None):
     K = len(np.unique(y_l))
     x_train, y_train, y_u_shuffled = af.partially_labeled_view(x_l, y_l, x_u, y_u)
-    # create a folder for storing results
-    create_folders(db_name)
+    # create folders for storing results
+    create_folders(db_name, num_exp)
+    if num_exp is not None:
+        subpath = db_name + "/tsvm/" + str(num_exp)
+    else:
+        subpath = db_name + "/tsvm"
     ovapreds = []
     for k in range(K):
         y_train_k = np.array(list(map(lambda label: 1 if label == k else (0 if label == -1 else -1), y_train)))
-        path_file = "svm_light/" + db_name + "/files/df_class_" + str(k)
-        path_model = "svm_light/" + db_name + "/models/model_class_" + str(k)
-        path_prediction = "svm_light/" + db_name + "/predictions/pred_class_" + str(k)
+        path_file = "output/" + subpath + "/files/df_class_" + str(k)
+        path_model = "output/" + subpath + "/models/model_class_" + str(k)
+        path_prediction = "output/" + subpath + "/predictions/pred_class_" + str(k)
         open(path_file, 'a').close()
         dump_svmlight_file(x_train, y_train_k, path_file, zero_based=False)
         # form a run command to create process of learning tsvm
