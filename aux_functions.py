@@ -2,7 +2,32 @@ import numpy as np
 from sklearn.datasets import load_svmlight_file
 
 
-def read_dna():
+class ReadDataset:
+    """
+    A class to read different datasets in numpy.ndarray format.
+    1. DNA Data Set: https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html
+    2. Vowel Data Set: https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html
+    3. Pendigits Data Set: https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html
+    4. MNIST Data Set: https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html
+    5. SensIT Vehicle Data Set: https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/multiclass.html
+    """
+    def __init__(self):
+        self._datasets = {
+            'dna': _read_dna,
+            # 'mnist': _read_mnist,
+            'pendigits': _read_pendigits#,
+            # 'vehicle': _read_vehicle,
+            # 'vowel': _read_vowel
+        }
+
+    def read(self, name):
+        if name in self._datasets:
+            return self._datasets[name]()
+        else:
+            raise KeyError("There is no dataset with this name. Check description of ReadDataset")
+
+
+def _read_dna():
     df1 = load_svmlight_file("data/dna.scale")
     x1 = df1[0].todense()
     y1 = df1[1]
@@ -16,7 +41,7 @@ def read_dna():
     return x, y
 
 
-def read_pendigits():
+def _read_pendigits():
     df = load_svmlight_file("data/pendigits")
     x = df[0].todense()
     y = df[1]

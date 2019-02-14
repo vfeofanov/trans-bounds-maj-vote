@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 import tsvm
 import self_learning as sl
 # auxiliary functions
-import aux_functions as af
+from aux_functions import ReadDataset, partially_labeled_view
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 # other packages
@@ -42,7 +42,8 @@ def plot_graph(acc, f1):
 
 def simple_test():
     # read and split data
-    x, y = af.read_dna()
+    read_data = ReadDataset()
+    x, y = read_data.read("dna")
     x_l, x_u, y_l, y_u = train_test_split(x, y, test_size=0.99, random_state=40)
     print("shape of labeled part:")
     print(x_l.shape, y_l.shape)
@@ -55,7 +56,7 @@ def simple_test():
     print()
 
     # partially labeled view
-    x_train, y_train, y_u_shuffled = af.partially_labeled_view(x_l, y_l, x_u, y_u)
+    x_train, y_train, y_u_shuffled = partially_labeled_view(x_l, y_l, x_u, y_u)
 
     # purely supervised classification
     print("random forest:")

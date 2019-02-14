@@ -4,12 +4,13 @@ from sklearn.ensemble import RandomForestClassifier
 import tsvm
 import self_learning as sl
 # auxiliary functions
-import aux_functions as af
+from aux_functions import ReadDataset, partially_labeled_view
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
 # other packages
 import numpy as np
 import time
+import sys
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -44,7 +45,7 @@ def experiment_test(x, y, db_name, unlab_size, N=20):
             print()
 
         # partially labeled view
-        x_train, y_train, y_u_shuffled = af.partially_labeled_view(x_l, y_l, x_u, y_u)
+        x_train, y_train, y_u_shuffled = partially_labeled_view(x_l, y_l, x_u, y_u)
 
         # purely supervised classification
         model = RandomForestClassifier(n_estimators=200, oob_score=True, n_jobs=-1)
@@ -128,5 +129,9 @@ def experiment_test(x, y, db_name, unlab_size, N=20):
 
 
 if __name__ == '__main__':
-    x, y = af.read_dna()
-    experiment_test(x, y, db_name="dna", unlab_size=0.99, N=2)
+    arguments = sys.argv[1:]
+    database = arguments[0]
+    split = float(arguments[1])
+    read_data = ReadDataset()
+    x, y = read_data.read(database)
+    experiment_test(x, y, db_name=database, unlab_size=split, N=1)
