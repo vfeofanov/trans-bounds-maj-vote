@@ -1,6 +1,6 @@
 # Transductive Bounds for the Multi-class Majority Vote Classifier
 This repository is devoted to an AAAI 2019 paper:
-Vasilii Feofanov, Emilie Devijver and Massih-Reza Amini - <a href="https://www.aaai.org/Papers/AAAI/2019/AAAI-FeofanovV.5570.pdf" target="_blank">Transductive Bounds for the Multi-class Majority Vote Classifier</a>.
+Vasilii Feofanov, Emilie Devijver and Massih-Reza Amini - <a href="https://aaai.org/ojs/index.php/AAAI/article/view/4236" target="_blank">Transductive Bounds for the Multi-class Majority Vote Classifier</a>.
 
 ## Multi-class Self-learning Algorithm (MSLA)
 The multi-class semi-supervised framework is considered. The goal is to infer a model based on given few labeled examples and lots of unlabeled ones. The proposed algorithm iteratively assigns pseudo-labels to a subset of unlabeled training examples that have their associated class margin above a threshold obtained from the transductive bound proposed in the <a href="https://aaai.org/ojs/index.php/AAAI/article/view/4236" target="_blank"> paper</a>. The algorithm is based on a supervised approach that can be any classifier that outputs posteriors. In our implementation, we use the <a href="https://www.stat.berkeley.edu/~breiman/randomforest2001.pdf" target="_blank"> random forest</a> approach. 
