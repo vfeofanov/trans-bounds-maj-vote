@@ -33,7 +33,7 @@ def joint_bayes_risk(margin, pred, i, j, theta, samplingRate=50):
     return infimum
 
 
-def optimal_threshold_vector(margin, pred, K, printy=True, samplingRate=50):
+def optimal_threshold_vector(margin, pred, K, samplingRate=50):
     theta = []
 
     def Reduction(matrix, margin):
@@ -56,7 +56,7 @@ def optimal_threshold_vector(margin, pred, K, printy=True, samplingRate=50):
                 if i == k:
                     continue
                 else:
-                    matrix[i, k] = joint_bayes_risk(margin, pred, i, k, thetas[n], printy)
+                    matrix[i, k] = joint_bayes_risk(margin, pred, i, k, thetas[n])
                     if (i == 0) and (k == 1):
                         JBR.append(matrix[i, k])
 
@@ -91,7 +91,12 @@ def msla(x_l, y_l, x_u, cython=True, **kwargs):
     else:
         n_est = kwargs['n_estimators']
 
-    classifier = RandomForestClassifier(n_estimators=n_est, oob_score=True, n_jobs=-1)
+    if 'random_state' not in kwargs:
+        rand_state = None
+    else:
+        rand_state = kwargs['random_state']
+
+    classifier = RandomForestClassifier(n_estimators=n_est, oob_score=True, n_jobs=-1, random_state=rand_state)
     l = x_l.shape[0]
     sample_distr = np.repeat(1 / l, l)
     K = np.unique(y_l).shape[0]
@@ -151,7 +156,12 @@ def fsla(x_l, y_l, x_u, theta, max_iter, **kwargs):
     else:
         n_est = kwargs['n_estimators']
 
-    classifier = RandomForestClassifier(n_estimators=n_est, oob_score=True, n_jobs=-1)
+    if 'random_state' not in kwargs:
+        rand_state = None
+    else:
+        rand_state = kwargs['random_state']
+
+    classifier = RandomForestClassifier(n_estimators=n_est, oob_score=True, n_jobs=-1, random_state=rand_state)
     l = x_l.shape[0]
     sample_distr = np.repeat(1 / l, l)
     n = 1
