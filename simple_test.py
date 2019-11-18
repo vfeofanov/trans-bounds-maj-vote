@@ -61,7 +61,7 @@ def simple_test():
     # purely supervised classification
     print("random forest:")
     t0 = time.time()
-    model = RandomForestClassifier(n_estimators=200, oob_score=True, n_jobs=-1)
+    model = RandomForestClassifier(n_estimators=200, oob_score=True, n_jobs=-1, random_state=40)
     model.fit(x_l, y_l)
     y_pred = model.predict(x_u)
     acc = [accuracy_score(y_u, y_pred)]
@@ -105,7 +105,7 @@ def simple_test():
     max_iter = 10
     print("fsla with theta={}:".format(theta))
     t0 = time.time()
-    model = sl.fsla(x_l, y_l, x_u, theta, max_iter)
+    model = sl.fsla(x_l, y_l, x_u, theta, max_iter, random_state=40)
     y_pred = model.predict(x_u)
     acc.append(accuracy_score(y_u, y_pred))
     f1.append(f1_score(y_u, y_pred, average="weighted"))
@@ -119,7 +119,7 @@ def simple_test():
     # multi-class self-learning algorithm
     print("msla:")
     t0 = time.time()
-    model, thetas = sl.msla(x_l, y_l, x_u)
+    model, thetas = sl.msla(x_l, y_l, x_u, random_state=40)
     y_pred = model.predict(x_u)
     print("optimal theta at each step:")
     print(thetas)
